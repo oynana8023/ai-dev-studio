@@ -22,13 +22,20 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # 🌟 关键步骤：让云端自动补全缺失的 Android 工程文件！
-      - run: flutter create --platforms=android --org com.aidevstudio --project-name ai_dev_studio .
-      
+      # 1. 云端自动生成缺失的 Android 工程文件
+      - name: Create Android project files
+        run: flutter create --platforms=android --org com.aidevstudio --project-name ai_dev_studio .
+
+      # 2. 云端自动升级 Kotlin 版本，解决依赖插件报错
+      - name: Upgrade Kotlin version
+        run: sed -i 's/1.8.22/2.0.10/g' android/settings.gradle
+
+      # 3. 拉取依赖并打包
       - run: flutter pub get
       - run: flutter analyze || true
       - run: flutter build apk --release
 
+      # 4. 上传产物
       - uses: actions/upload-artifact@v4
         with:
           name: ai-dev-studio-apk
