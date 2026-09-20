@@ -22,23 +22,28 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # 1. 云端自动生成缺失的 Android 工程文件
+      # 1. 云端自动生成 Android 工程文件
       - name: Create Android project files
         run: flutter create --platforms=android --org com.aidevstudio --project-name ai_dev_studio .
 
-      # 2. 强制替换 Kotlin 版本为 1.9.24（直接整行替换，无视原本的版本号）
+      # 2. 强制升级 Kotlin 版本解决编译报错
       - name: Force upgrade Kotlin version
         run: |
           sed -i '/id "org.jetbrains.kotlin.android"/c\        id "org.jetbrains.kotlin.android" version "1.9.24" apply false' android/settings.gradle
-          echo "===== 替换后的 settings.gradle ====="
-          cat android/settings.gradle
 
-      # 3. 拉取依赖并打包
+      # 3. 强制注入网络权限（解决 Failed host lookup 问题）
+      - name: Inject Internet Permission
+        run: |
+          sed -i '/<manifest /a\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          echo "===== 注入后的 AndroidManifest.xml ====="
+          cat android/app/src/main/AndroidManifest.xml
+
+      # 4. 拉取依赖并打包
       - run: flutter pub get
       - run: flutter analyze || true
       - run: flutter build apk --release
 
-      # 4. 上传产物
+      # 5. 上传产物
       - uses: actions/upload-artifact@v4
         with:
           name: ai-dev-studio-apk
