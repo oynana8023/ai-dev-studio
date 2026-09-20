@@ -22,6 +22,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # 🌟 关键步骤：让云端自动补全缺失的 Android 工程文件！
+      - run: flutter create --platforms=android --org com.aidevstudio --project-name ai_dev_studio .
+      
       - run: flutter pub get
       - run: flutter analyze || true
       - run: flutter build apk --release
