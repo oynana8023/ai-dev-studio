@@ -20,7 +20,7 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-          cache: true
+          cache: false
 
       # 1. 云端自动生成 Android 工程文件
       - name: Create Android project files
