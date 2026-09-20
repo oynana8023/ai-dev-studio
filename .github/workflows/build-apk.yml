@@ -26,9 +26,12 @@ jobs:
       - name: Create Android project files
         run: flutter create --platforms=android --org com.aidevstudio --project-name ai_dev_studio .
 
-      # 2. 云端自动升级 Kotlin 版本，解决依赖插件报错
-      - name: Upgrade Kotlin version
-        run: sed -i 's/1.8.22/2.0.10/g' android/settings.gradle
+      # 2. 强制替换 Kotlin 版本为 1.9.24（直接整行替换，无视原本的版本号）
+      - name: Force upgrade Kotlin version
+        run: |
+          sed -i '/id "org.jetbrains.kotlin.android"/c\        id "org.jetbrains.kotlin.android" version "1.9.24" apply false' android/settings.gradle
+          echo "===== 替换后的 settings.gradle ====="
+          cat android/settings.gradle
 
       # 3. 拉取依赖并打包
       - run: flutter pub get
