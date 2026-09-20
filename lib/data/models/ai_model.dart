@@ -36,6 +36,7 @@ class AiModel {
   final int contextLength;
   final bool isFree;
   final ModelCapability capability;
+  final String providerId; // 新增，用于区分模型来源
 
   const AiModel({
     required this.id,
@@ -44,6 +45,7 @@ class AiModel {
     this.contextLength = 0,
     this.isFree = true,
     this.capability = ModelCapability.unknown,
+    this.providerId = 'unknown',
   });
 
   factory AiModel.fromOpenRouter(Map<String, dynamic> json) {
@@ -59,6 +61,36 @@ class AiModel {
       contextLength: json['context_length'] as int? ?? 0,
       isFree: prompt == 0 && completion == 0,
       capability: ModelCapability.infer(id, name),
+      providerId: 'openrouter',
+    );
+  }
+
+  factory AiModel.fromDomestic(Map<String, dynamic> json, String platformId) {
+    final id = json['id'] as String;
+    final name = json['name'] as String? ?? json['id'] as String;
+
+    // 国内各大平台免费模型库（可根据各平台最新政策持续补充）
+    final freeModels = {
+      'zhipu': ['glm-4.7-flash', 'glm-4-flash', 'glm-4v-flash'],
+      'deepseek': ['deepseek-flash'],
+      'qwen': ['qwen-turbo', 'qwen-plus', 'qwen-vl-plus'],
+      'ernie': ['ernie-3.5-turbo', 'ernie-speed', 'ernie-speed-128k', 'ernie-lite'],
+      'doubao': ['doubao-1-5-lite', 'doubao-lite-4k'],
+      'hunyuan': ['hunyuan-lite'],
+      'spark': ['spark-lite'],
+      'nvidia': ['meta/llama3-70b-instruct', 'mistralai/mistral-7b-instruct-v0.3', 'google/gemma-2-9b-it'],
+    };
+
+    final isFree = freeModels[platformId]?.contains(id) ?? false;
+
+    return AiModel(
+      id: id,
+      name: name,
+      description: json['description'] as String?,
+      contextLength: json['context_length'] as int? ?? 0,
+      isFree: isFree,
+      capability: ModelCapability.infer(id, name),
+      providerId: platformId,
     );
   }
 }
